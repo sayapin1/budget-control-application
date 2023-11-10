@@ -1,10 +1,49 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ScheduleModule } from '@nestjs/schedule';
+import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
+
+import { User } from './entity/user.entity';
+import { Budget } from './entity/budget.entity';
+import { Expense } from './entity/expense.entity';
+
+import { AuthModule } from './feature/auth/auth.module';
+import { BudgetModule } from './feature/budget/budget.module';
+import { DailyModule } from './feature/daily/daily.module';
+import { ExpenseModule } from './feature/expense/expense.module';
+import { StatisticsModule } from './feature/statistics/statistics.module';
 
 @Module({
-  imports: [],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [
+    ScheduleModule.forRoot(),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: `.${process.env.NODE_ENV}.env`,
+    }),
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        return {
+          type: 'mysql',
+          host: 'localhost',
+          port: parseInt(configService.get<string>('DB_PORT')),
+          username: configService.get<string>('DB_USERNAME'),
+          password: configService.get<string>('DB_PASSWORD'),
+          database: configService.get<string>('DB_DATABASE'),
+          entities: [User, Budget, Expense],
+          synchronize: false, // 사용시에만 true
+          logging: configService.get<string>('NODE_ENV') === 'local',
+          namingStrategy: new SnakeNamingStrategy(), // 컬럼명 snake case로 변환
+        };
+      },
+    }),
+    AuthModule,
+    BudgetModule,
+    DailyModule,
+    ExpenseModule,
+    StatisticsModule,
+  ],
+  providers: [],
 })
 export class AppModule {}

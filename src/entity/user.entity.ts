@@ -20,19 +20,10 @@ export class User {
   @Column()
   password!: string;
 
-  @Column({ default: false })
-  isRecommended!: boolean;
-
-  @Column({ type: 'double', nullable: true })
-  latitude?: number;
-
-  @Column({ type: 'double', nullable: true })
-  longitude?: number;
-
   @CreateDateColumn()
   createdAt!: Date;
 
-  @UpdateDateColumn({ nullable: true })
+  @UpdateDateColumn()
   updatedAt?: Date;
 
   @BeforeInsert()
