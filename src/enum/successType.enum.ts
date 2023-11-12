@@ -9,4 +9,5 @@ export enum SuccessType {
   EXPENSE_DETAIL_GET = '지출 상세 불러오기 성공',
   EXPENSE_CREATE = '지출 생성 성공',
   EXPENSE_UPDATE = '지출 수정 성공',
+  EXPENSE_DELETE = '지출 삭제 성공',
 }

@@ -14,4 +14,5 @@ export enum FailType {
   EXPENSE_NOT_FOUND = '지출이 존재하지 않습니다.',
   EXPENSE_CREATE_FAIL = '지출 생성에 실패하였습니다.',
   EXPENSE_UPDATE_FAIL = '지출 수정에 실패하였습니다.',
+  EXPENSE_DELETE_FAIL = '지출 삭제에 실패하였습니다.',
 }

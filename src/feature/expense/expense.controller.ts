@@ -76,8 +76,17 @@ export class ExpenseController {
     }
   }
 
+  /* 지출 삭제 */
   @Delete('/record/:expenseId')
   async deleteExpense(@Param('expenseId') expenseId: number) {
-    return await this.expenseService.deleteExpense(expenseId);
+    try {
+      await this.expenseService.deleteExpense(expenseId);
+
+      return {
+        message: SuccessType.EXPENSE_DELETE,
+      };
+    } catch (error) {
+      error.message;
+    }
   }
 }

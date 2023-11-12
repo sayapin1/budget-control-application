@@ -74,9 +74,7 @@ export class ExpenseService {
     updateExpenseDto: UpdateExpenseDto,
   ): Promise<void> {
     try {
-      const expense = await this.expenseRepository.findOne({
-        where: { id: expenseId },
-      });
+      const expense = await this.findIfExpenseExists(expenseId);
 
       if (!expense) {
         throw new NotFoundException(FailType.EXPENSE_NOT_FOUND);
@@ -90,7 +88,23 @@ export class ExpenseService {
     }
   }
 
-  async deleteExpense(expenseId: number) {
-    return true;
+  async deleteExpense(expenseId: number): Promise<void> {
+    try {
+      const expense = await this.findIfExpenseExists(expenseId);
+
+      if (!expense) {
+        throw new NotFoundException(FailType.EXPENSE_NOT_FOUND);
+      }
+
+      await this.expenseRepository.delete(expense);
+    } catch (error) {
+      throw new InternalServerErrorException(FailType.EXPENSE_DELETE_FAIL);
+    }
+  }
+
+  async findIfExpenseExists(expenseId: number): Promise<Expense> {
+    return await this.expenseRepository.findOne({
+      where: { id: expenseId },
+    });
   }
 }
