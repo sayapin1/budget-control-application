@@ -14,6 +14,7 @@ import {
 import { ExpenseService } from './expense.service';
 import { CreateExpenseDto } from './dto/createExpense.dto';
 import { GetExpenseDto } from './dto/getExpense.dto';
+import { UpdateExpenseDto } from './dto/updateExpense.dto';
 import { JwtAuthGuard } from '../auth/guard/jwtAuth.guard';
 import { SuccessType } from '../../enum/successType.enum';
 
@@ -58,12 +59,21 @@ export class ExpenseController {
     }
   }
 
+  /* 지출 수정 */
   @Patch('/record/:expenseId')
   async updateExpense(
-    @Body(ValidationPipe) createExpenseDto: CreateExpenseDto,
+    @Body(ValidationPipe) updateExpenseDto: UpdateExpenseDto,
     @Param('expenseId') expenseId: number,
   ) {
-    return await this.expenseService.updateExpense(expenseId, createExpenseDto);
+    try {
+      await this.expenseService.updateExpense(expenseId, updateExpenseDto);
+
+      return {
+        message: SuccessType.EXPENSE_UPDATE,
+      };
+    } catch (error) {
+      error.message;
+    }
   }
 
   @Delete('/record/:expenseId')

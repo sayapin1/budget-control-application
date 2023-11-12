@@ -5,10 +5,10 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ExpenseCategory } from '../../enum/expenseCategory.enum';
 import { FailType } from '../../enum/failType.enum';
 import { CreateExpenseDto } from './dto/createExpense.dto';
 import { GetExpenseDto } from './dto/getExpense.dto';
+import { UpdateExpenseDto } from './dto/updateExpense.dto';
 import { Expense } from '../../entity/expense.entity';
 
 @Injectable()
@@ -52,7 +52,10 @@ export class ExpenseService {
     return true;
   }
 
-  async createExpense(userId: number, createExpenseDto: CreateExpenseDto) {
+  async createExpense(
+    userId: number,
+    createExpenseDto: CreateExpenseDto,
+  ): Promise<void> {
     try {
       await this.expenseRepository.create({
         user: { id: userId },
@@ -66,8 +69,25 @@ export class ExpenseService {
     }
   }
 
-  async updateExpense(expenseId: number, createExpenseDto: CreateExpenseDto) {
-    return true;
+  async updateExpense(
+    expenseId: number,
+    updateExpenseDto: UpdateExpenseDto,
+  ): Promise<void> {
+    try {
+      const expense = await this.expenseRepository.findOne({
+        where: { id: expenseId },
+      });
+
+      if (!expense) {
+        throw new NotFoundException(FailType.EXPENSE_NOT_FOUND);
+      }
+
+      Object.assign(expense, updateExpenseDto);
+
+      await this.expenseRepository.save(expense);
+    } catch (error) {
+      throw new InternalServerErrorException(FailType.EXPENSE_UPDATE_FAIL);
+    }
   }
 
   async deleteExpense(expenseId: number) {
