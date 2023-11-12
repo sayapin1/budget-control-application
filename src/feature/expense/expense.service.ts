@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { ExpenseCategory } from '../../enum/expenseCategory.enum';
 import { FailType } from '../../enum/failType.enum';
 import { CreateExpenseDto } from './dto/createExpense.dto';
 import { GetExpenseDto } from './dto/getExpense.dto';
@@ -13,8 +14,34 @@ export class ExpenseService {
     private readonly expenseRepository: Repository<Expense>,
   ) {}
 
-  async getExpenseById(expenseId: number) {
-    return true;
+  async getExpenseById(expenseId: number): Promise<Expense> {
+    const expenseDetail = await this.expenseRepository.findOne({
+      where: {
+        id: expenseId,
+      },
+      select: {
+        id: true,
+        spentDate: true,
+        category: true,
+        amount: true,
+        createdAt: true,
+        memo: true,
+        isCounted: true,
+        user: {
+          id: true,
+          username: true,
+        },
+      },
+      relations: {
+        user: true,
+      },
+    });
+
+    if (!expenseDetail) {
+      throw new NotFoundException(FailType.EXPENSE_NOT_FOUND);
+    }
+
+    return expenseDetail;
   }
 
   async getExpenseListByQuery(getExpenseDto: GetExpenseDto) {

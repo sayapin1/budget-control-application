@@ -15,15 +15,25 @@ import { ExpenseService } from './expense.service';
 import { CreateExpenseDto } from './dto/createExpense.dto';
 import { GetExpenseDto } from './dto/getExpense.dto';
 import { JwtAuthGuard } from '../auth/guard/jwtAuth.guard';
+import { SuccessType } from '../../enum/successType.enum';
 
 @UseGuards(JwtAuthGuard)
 @Controller('expense')
 export class ExpenseController {
   constructor(private readonly expenseService: ExpenseService) {}
 
+  /* 지출 상세 조회 */
   @Get('/record/:expenseId')
   async getExpenseById(@Param('expenseId') expenseId: number) {
-    return await this.expenseService.getExpenseById(expenseId);
+    try {
+      const expenseDetail = await this.expenseService.getExpenseById(expenseId);
+      return {
+        message: SuccessType.EXPENSE_DETAIL_GET,
+        data: expenseDetail,
+      };
+    } catch (error) {
+      error.message;
+    }
   }
 
   @Get('/record')
