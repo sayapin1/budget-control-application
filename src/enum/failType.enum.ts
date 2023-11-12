@@ -12,4 +12,5 @@ export enum FailType {
   BUDGET_SET_FAIL = '예산 지정에 실패하였습니다.',
   BUDGET_UPDATE_FAIL = '예산 수정에 실패하였습니다.',
   EXPENSE_NOT_FOUND = '지출이 존재하지 않습니다.',
+  EXPENSE_CREATE_FAIL = '지출 생성에 실패하였습니다.',
 }

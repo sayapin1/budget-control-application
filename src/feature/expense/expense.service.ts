@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ExpenseCategory } from '../../enum/expenseCategory.enum';
@@ -49,7 +53,17 @@ export class ExpenseService {
   }
 
   async createExpense(userId: number, createExpenseDto: CreateExpenseDto) {
-    return true;
+    try {
+      await this.expenseRepository.create({
+        user: { id: userId },
+        spentDate: createExpenseDto.spentDate,
+        category: createExpenseDto.category,
+        amount: createExpenseDto.amount,
+        memo: createExpenseDto.memo,
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(FailType.EXPENSE_CREATE_FAIL);
+    }
   }
 
   async updateExpense(expenseId: number, createExpenseDto: CreateExpenseDto) {

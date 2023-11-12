@@ -7,4 +7,5 @@ export enum SuccessType {
   BUDGET_UPDATE = '예산 수정 성공',
   BUDGET_RECOMMENDATION_GET = '예산을 추천해드리겠습니다.',
   EXPENSE_DETAIL_GET = '지출 상세 불러오기 성공',
+  EXPENSE_CREATE = '지출 생성 성공',
 }

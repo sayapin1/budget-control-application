@@ -41,12 +41,21 @@ export class ExpenseController {
     return await this.expenseService.getExpenseListByQuery(getExpenseDto);
   }
 
+  /* 지출 생성 */
   @Post('/record')
   async createExpense(
     @Req() req,
     @Body(ValidationPipe) createExpenseDto: CreateExpenseDto,
   ) {
-    return await this.expenseService.createExpense(req.id, createExpenseDto);
+    try {
+      await this.expenseService.createExpense(req.id, createExpenseDto);
+
+      return {
+        message: SuccessType.EXPENSE_CREATE,
+      };
+    } catch (error) {
+      error.message;
+    }
   }
 
   @Patch('/record/:expenseId')
