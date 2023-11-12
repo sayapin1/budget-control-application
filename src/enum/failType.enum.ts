@@ -8,4 +8,7 @@ export enum FailType {
   USERNAME_NOT_EXIST = '존재하지 않는 계정입니다.',
   PASSWORD_MISMATCH = '비밀번호가 일치하지 않습니다.',
   AUTH_INVALID_TOKEN = '유효하지 않은 토큰입니다.',
+  BUDGET_NOT_FOUND = '지정한 예산이 없습니다.',
+  BUDGET_SET_FAIL = '예산 지정에 실패하였습니다.',
+  BUDGET_UPDATE_FAIL = '예산 수정에 실패하였습니다.',
 }

@@ -18,6 +18,9 @@ export class Budget {
   @JoinColumn({ name: 'user_id' })
   user!: User;
 
+  @Column()
+  month!: string;
+
   @Column({ nullable: true })
   food?: number;
 
@@ -47,6 +50,9 @@ export class Budget {
 
   @Column({ nullable: true })
   etc?: number;
+
+  @Column()
+  total!: number;
 
   @CreateDateColumn()
   createdAt!: Date;

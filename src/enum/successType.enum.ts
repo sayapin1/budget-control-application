@@ -2,4 +2,8 @@
 export enum SuccessType {
   USER_SIGN_UP = '회원가입 성공',
   USER_SIGN_IN = '로그인 성공',
+  BUDGET_GET = '예산 가져오기 성공',
+  BUDGET_SET = '예산 지정 성공',
+  BUDGET_UPDATE = '예산 수정 성공',
+  BUDGET_RECOMMENDATION_GET = '예산을 추천해드리겠습니다.',
 }
