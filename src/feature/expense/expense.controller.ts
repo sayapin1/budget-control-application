@@ -37,9 +37,22 @@ export class ExpenseController {
     }
   }
 
+  /* 지출 목록 조회
+   * Query를 통해 필수적으로 기간을 받고,  조회 조건에 category, 최소, 최대 금액 입력*/
   @Get('/record')
   async getExpenseListByQuery(@Query() getExpenseDto: GetExpenseDto) {
-    return await this.expenseService.getExpenseListByQuery(getExpenseDto);
+    try {
+      const expenseList = await this.expenseService.getExpenseListByQuery(
+        getExpenseDto,
+      );
+
+      return {
+        message: SuccessType.EXPENSE_LIST_GET,
+        data: expenseList,
+      };
+    } catch (error) {
+      error.message;
+    }
   }
 
   /* 지출 생성 */

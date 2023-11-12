@@ -48,8 +48,36 @@ export class ExpenseService {
     return expenseDetail;
   }
 
-  async getExpenseListByQuery(getExpenseDto: GetExpenseDto) {
-    return true;
+  async getExpenseListByQuery(
+    getExpenseDto: GetExpenseDto,
+  ): Promise<Expense[]> {
+    const { start, end, category, minimum, maximum } = getExpenseDto;
+
+    const queryBuilder = this.expenseRepository.createQueryBuilder('expense');
+
+    // 1. start와 end를 통한 기간 필터링
+    if (start && end) {
+      queryBuilder.andWhere('expense.date >= :start', { start });
+      queryBuilder.andWhere('expense.date <= :end', { end });
+    }
+
+    // 2. category 필터링
+    if (category) {
+      queryBuilder.andWhere('expense.category = :category', { category });
+    }
+
+    // 3. minimum 및 maximum 금액 필터링
+    if (minimum !== undefined) {
+      queryBuilder.andWhere('expense.amount >= :minimum', { minimum });
+    }
+
+    if (maximum !== undefined) {
+      queryBuilder.andWhere('expense.amount <= :maximum', { maximum });
+    }
+
+    // 4. 모든 조건을 합쳐서 조회
+    const expenseList = await queryBuilder.getMany();
+    return expenseList;
   }
 
   async createExpense(
