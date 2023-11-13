@@ -1,10 +1,10 @@
-import { IsInt, IsIn } from 'class-validator';
+import { IsIn, IsString } from 'class-validator';
 
 export class YearMonthQueryDto {
-  @IsInt()
-  year: number;
+  @IsString()
+  year: string;
 
-  @IsInt()
-  @IsIn([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
-  month: number;
+  @IsString()
+  @IsIn(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'])
+  month: string;
 }
