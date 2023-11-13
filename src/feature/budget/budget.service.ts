@@ -13,12 +13,14 @@ import { FailType } from '../../enum/failType.enum';
 import { CreateBudgetDto } from './dto/createBudget.dto';
 import { YearMonthQueryDto } from './dto/yearMonthQuery.dto';
 import { UpdateBudgetDto } from './dto/updateBudget.dto';
+import { StatisticsLib } from '../statistics/statisticsLib';
 
 @Injectable()
 export class BudgetService {
   constructor(
     @InjectRepository(Budget)
     private readonly budgetRepository: Repository<Budget>,
+    private readonly statisticsLib: StatisticsLib,
     @Inject(CACHE_MANAGER)
     private cacheManager: Cache,
   ) {}
@@ -135,7 +137,15 @@ export class BudgetService {
   }
 
   async getBudgetRecommendation(total: number) {
-    const budgetStatistics = await this.cacheManager.get('averageBudget');
+    let budgetStatistics = await this.cacheManager.get('averageBudget');
+    if (!budgetStatistics) {
+      budgetStatistics = await this.statisticsLib.getAverageBudgetStatistics();
+      await this.cacheManager.set(
+        'averageBudget',
+        JSON.stringify(budgetStatistics),
+      );
+    }
+
     const parsedBudgetStatistics = JSON.parse(budgetStatistics as string);
 
     const recommendedBudget = {};
