@@ -31,7 +31,7 @@ export class BudgetController {
   ) {
     try {
       const budget = await this.budgetService.getBudgetSettingsById(
-        req.id,
+        req.user.id,
         yearMonthQueryDto,
       );
 
@@ -54,7 +54,7 @@ export class BudgetController {
   ) {
     try {
       await this.budgetService.setBudgets(
-        req.id,
+        req.user.id,
         createBudgetDto,
         yearMonthQueryDto,
       );

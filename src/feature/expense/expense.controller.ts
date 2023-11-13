@@ -62,7 +62,7 @@ export class ExpenseController {
     @Body(ValidationPipe) createExpenseDto: CreateExpenseDto,
   ) {
     try {
-      await this.expenseService.createExpense(req.id, createExpenseDto);
+      await this.expenseService.createExpense(req.user.id, createExpenseDto);
 
       return {
         message: SuccessType.EXPENSE_CREATE,

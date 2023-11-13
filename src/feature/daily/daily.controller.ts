@@ -13,7 +13,7 @@ export class DailyController {
   @Get('/recommendation')
   async getTodaysExpenseRecommendation(@Req() req) {
     const expenseRecommendation =
-      await this.dailyService.getTodaysExpenseRecommendation(req.id);
+      await this.dailyService.getTodaysExpenseRecommendation(req.user.id);
 
     return {
       message: SuccessType.EXPENSE_RECOMMENDATION_GET,
@@ -26,7 +26,9 @@ export class DailyController {
    * 오늘 기준 사용했으면 적절했을 금액과 오늘 기준 사용한 금액을 알려주고 위험도를 퍼센테이지로 알려줍니다. */
   @Get('/dailyGuide')
   async getTodaysExpenseGuide(@Req() req) {
-    const expenseGuide = await this.dailyService.getTodaysExpenseGuide(req.id);
+    const expenseGuide = await this.dailyService.getTodaysExpenseGuide(
+      req.user.id,
+    );
 
     return {
       message: SuccessType.EXPENSE_GUIDE_GET,

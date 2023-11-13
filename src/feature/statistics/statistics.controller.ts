@@ -14,7 +14,7 @@ export class StatisticsController {
     @Req() req,
   ) {
     return await this.statisticsService.getExpenseStatistics(
-      req.id,
+      req.user.id,
       getExpenseStatisticsDto,
     );
   }

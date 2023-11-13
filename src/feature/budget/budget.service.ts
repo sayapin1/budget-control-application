@@ -34,9 +34,11 @@ export class BudgetService {
 
     const queryBuilder = this.budgetRepository.createQueryBuilder('budget');
 
+    console.log('*******', userId);
+
     queryBuilder.select([
       'budget.id',
-      'budget.userId',
+      'budget.user_id',
       'budget.total',
       'budget.month',
     ]);
@@ -58,7 +60,7 @@ export class BudgetService {
     }
 
     const budget = await queryBuilder
-      .andWhere('budget.userId = :userId', { userId })
+      .andWhere('budget.user_id = :userId', { userId })
       .andWhere('budget.month = :targetMonth', { targetMonth })
       .getOne();
 
@@ -125,8 +127,6 @@ export class BudgetService {
           budget[category] = updateBudgetDto[category];
         }
       });
-
-      console.log('********', budget);
 
       budget.total = 0;
 
