@@ -119,14 +119,32 @@ export class BudgetService {
         throw new NotFoundException(FailType.BUDGET_NOT_FOUND);
       }
 
-      for (const category of Object.keys(updateBudgetDto)) {
-        if (updateBudgetDto[category]) {
+      const categories = Object.keys(updateBudgetDto);
+      categories.forEach((category) => {
+        if (updateBudgetDto[category] !== undefined) {
           budget[category] = updateBudgetDto[category];
         }
-      }
+      });
 
-      budget.total = Object.values(budget).reduce(
-        (sum, value) => (sum += value || 0),
+      console.log('********', budget);
+
+      budget.total = 0;
+
+      // total 업데이트
+      budget.total = (Object.entries(budget) as [string, number][]).reduce(
+        (sum, [key, value]) => {
+          // key가 'id'일 경우 더하지 않음
+          if (key === 'id') {
+            return sum;
+          }
+
+          // 숫자 타입이 아닌 경우 더하지 않음
+          if (typeof value !== 'number') {
+            return sum;
+          }
+
+          return sum + value;
+        },
         0,
       );
 
