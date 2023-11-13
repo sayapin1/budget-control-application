@@ -67,6 +67,7 @@ export class BudgetController {
     }
   }
 
+  /* 예산 수정 */
   @Patch('/setting/:budgetId')
   async updateBudgets(
     @Body(ValidationPipe) updateBudgetDto: UpdateBudgetDto,
@@ -82,6 +83,8 @@ export class BudgetController {
     }
   }
 
+  /* 예산 설계(추천)
+   * 카테고리 지정 없이 총액 (ex. 100만원) 을 입력하면, 카테고리 별 예산을 자동 생성합니다. */
   @Get('/recommendation')
   async getBudgetRecommendation(
     @Body(ValidationPipe) createBudgetDto: CreateBudgetDto,
