@@ -11,4 +11,5 @@ export enum SuccessType {
   EXPENSE_UPDATE = '지출 수정 성공',
   EXPENSE_DELETE = '지출 삭제 성공',
   EXPENSE_LIST_GET = '지출 목록 불러오기 성공',
+  EXPENSE_RECOMMENDATION_GET = '오늘의 추천 지출은?',
 }

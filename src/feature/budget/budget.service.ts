@@ -148,4 +148,30 @@ export class BudgetService {
 
     return recommendedBudget;
   }
+
+  /* db에서 사용자 id가 가진 이번달 총 예산을 가져오기 */
+  async getMonthlyBudget(userId: number): Promise<number> {
+    const today = new Date();
+    const thisYear = today.getFullYear();
+    const thisMonth = today.getMonth() + 1;
+
+    const formattedMonth = thisMonth < 10 ? `0${thisMonth}` : thisMonth;
+
+    const thisYearMonth = `${thisYear}-${formattedMonth}`;
+
+    const result = await this.budgetRepository.findOne({
+      where: {
+        user: { id: userId },
+        month: thisYearMonth,
+      },
+      select: {
+        total: true,
+      },
+      relations: {
+        user: true,
+      },
+    });
+
+    return result.total;
+  }
 }

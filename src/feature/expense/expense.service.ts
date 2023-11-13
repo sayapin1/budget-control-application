@@ -135,4 +135,22 @@ export class ExpenseService {
       where: { id: expenseId },
     });
   }
+
+  /* 해당 월에 사용했던 총 지출 계산 */
+  async getPreviousExpense(userId): Promise<number> {
+    const today = new Date();
+    const thisYear = today.getFullYear();
+    const thisMonth = today.getMonth() + 1;
+
+    const expenses = await this.expenseRepository
+      .createQueryBuilder('expense')
+      .where('expense.user_id = :userId', { userId })
+      .andWhere('YEAR(expense.spentDate) = :year', { year: thisYear })
+      .andWhere('MONTH(expense.spentDate) = :month', { month: thisMonth })
+      .andWhere('expense.is_counted = true')
+      .select('SUM(expense.amount)', 'totalAmount')
+      .getRawOne();
+
+    return expenses ? expenses.totalAmount : 0;
+  }
 }
