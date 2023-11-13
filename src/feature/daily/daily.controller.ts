@@ -21,8 +21,16 @@ export class DailyController {
     };
   }
 
+  /* 오늘 지출 안내
+   * 오늘 지출한 내용을 총액과 카테고리 별 금액으로 알려줍니다.
+   * 오늘 기준 사용했으면 적절했을 금액과 오늘 기준 사용한 금액을 알려주고 위험도를 퍼센테이지로 알려줍니다. */
   @Get('/dailyGuide')
   async getTodaysExpenseGuide(@Req() req) {
-    return await this.dailyService.getTodaysExpenseGuide(req.id);
+    const expenseGuide = await this.dailyService.getTodaysExpenseGuide(req.id);
+
+    return {
+      message: SuccessType.EXPENSE_GUIDE_GET,
+      data: expenseGuide,
+    };
   }
 }

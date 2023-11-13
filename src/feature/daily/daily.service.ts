@@ -81,7 +81,65 @@ export class DailyService {
   }
 
   async getTodaysExpenseGuide(userId: number) {
-    return true;
+    // 오늘 지출한 내용을 가져오기
+    const todayExpenses = await this.expenseLib.getTodaysExpenses(userId);
+
+    const recommendationResult = await this.getTodaysExpenseRecommendation(
+      userId,
+    );
+
+    const categoryStats: Record<
+      string,
+      {
+        recommendedAmount: number;
+        spentAmount: number;
+        dangerPercentage: number;
+      }
+    > = {};
+
+    // 오늘 지출한 내역을 카테고리별로 분류하고 통계를 계산
+    todayExpenses.forEach((expense) => {
+      const category = expense.category; // 카테고리 필드에 따라 수정
+      const amount = expense.amount;
+
+      if (!categoryStats[category]) {
+        categoryStats[category] = {
+          recommendedAmount: 0,
+          spentAmount: 0,
+          dangerPercentage: 0,
+        };
+      }
+
+      // 오늘 적정 금액 계산 (getTodaysExpenseRecommendation에서 계산된 값 사용)
+      categoryStats[category].recommendedAmount +=
+        recommendationResult.categoryAmounts[category] || 1;
+
+      // 오늘 지출한 금액 누적
+      categoryStats[category].spentAmount += amount;
+    });
+
+    // 위험도 계산 및 할당
+    Object.keys(categoryStats).forEach((category) => {
+      const { recommendedAmount, spentAmount } = categoryStats[category];
+      categoryStats[category].dangerPercentage =
+        (spentAmount / recommendedAmount) * 100 || 0;
+    });
+
+    const todaysTotalExpense = this.calculateTotalAmount(todayExpenses);
+
+    return {
+      totalAppropriateAmount: recommendationResult.totalAmount,
+      categoryAppropriateAmount: recommendationResult.categoryAmounts,
+      todaySpentAmount: todaysTotalExpense,
+      todayDangerPercentage:
+        (todaysTotalExpense / recommendationResult.totalAmount) * 100 || 0,
+      categoryStats: categoryStats,
+    };
+  }
+
+  // 주어진 지출 내역의 총액을 계산.
+  calculateTotalAmount(expenses: Expense[]): number {
+    return expenses.reduce((total, expense) => total + expense.amount, 0);
   }
 
   @Cron('0 9 * * 1')

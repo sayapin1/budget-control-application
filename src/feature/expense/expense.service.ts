@@ -137,7 +137,7 @@ export class ExpenseService {
   }
 
   /* 해당 월에 사용했던 총 지출 계산 */
-  async getPreviousExpense(userId): Promise<number> {
+  async getPreviousExpense(userId: number): Promise<number> {
     const today = new Date();
     const thisYear = today.getFullYear();
     const thisMonth = today.getMonth() + 1;
@@ -152,5 +152,25 @@ export class ExpenseService {
       .getRawOne();
 
     return expenses ? expenses.totalAmount : 0;
+  }
+
+  /* 오늘 지출한 내역 가져오기 */
+  async getTodaysExpenses(userId: number): Promise<Expense[]> {
+    const today = new Date();
+    const todayFormatted = `${today.getFullYear()}-${
+      today.getMonth() + 1
+    }-${today.getDate()}`;
+
+    return await this.expenseRepository.find({
+      where: {
+        user: { id: userId },
+        isCounted: true,
+        spentDate: todayFormatted,
+      },
+      select: {
+        category: true,
+        amount: true,
+      },
+    });
   }
 }

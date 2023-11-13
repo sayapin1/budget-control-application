@@ -2,8 +2,8 @@ import { IsDate, IsEnum, IsInt, IsOptional, IsString } from 'class-validator';
 import { ExpenseCategory } from '../../../enum/expenseCategory.enum';
 
 export class CreateExpenseDto {
-  @IsDate()
-  spentDate!: Date;
+  @IsString()
+  spentDate!: string;
 
   @IsEnum(ExpenseCategory)
   category!: ExpenseCategory;
