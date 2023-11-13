@@ -29,19 +29,15 @@ export class BudgetController {
     @Query() yearMonthQueryDto: YearMonthQueryDto,
     @Req() req,
   ) {
-    try {
-      const budget = await this.budgetService.getBudgetSettingsById(
-        req.user.id,
-        yearMonthQueryDto,
-      );
+    const budget = await this.budgetService.getBudgetSettingsById(
+      req.user.id,
+      yearMonthQueryDto,
+    );
 
-      return {
-        message: SuccessType.BUDGET_GET,
-        data: budget,
-      };
-    } catch (error) {
-      error.message;
-    }
+    return {
+      message: SuccessType.BUDGET_GET,
+      data: budget,
+    };
   }
 
   /* 지정한 월의 예산을 정하기
@@ -52,19 +48,15 @@ export class BudgetController {
     @Body(ValidationPipe) createBudgetDto: CreateBudgetDto,
     @Query() yearMonthQueryDto: YearMonthQueryDto,
   ) {
-    try {
-      await this.budgetService.setBudgets(
-        req.user.id,
-        createBudgetDto,
-        yearMonthQueryDto,
-      );
+    await this.budgetService.setBudgets(
+      req.user.id,
+      createBudgetDto,
+      yearMonthQueryDto,
+    );
 
-      return {
-        message: SuccessType.BUDGET_SET,
-      };
-    } catch (error) {
-      error.message;
-    }
+    return {
+      message: SuccessType.BUDGET_SET,
+    };
   }
 
   /* 예산 수정 */
@@ -73,14 +65,10 @@ export class BudgetController {
     @Body(ValidationPipe) updateBudgetDto: UpdateBudgetDto,
     @Param('budgetId') budgetId: number,
   ) {
-    try {
-      await this.budgetService.updateBudgets(budgetId, updateBudgetDto);
-      return {
-        message: SuccessType.BUDGET_UPDATE,
-      };
-    } catch (error) {
-      error.message;
-    }
+    await this.budgetService.updateBudgets(budgetId, updateBudgetDto);
+    return {
+      message: SuccessType.BUDGET_UPDATE,
+    };
   }
 
   /* 예산 설계(추천)
