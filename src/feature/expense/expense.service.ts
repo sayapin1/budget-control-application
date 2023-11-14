@@ -224,6 +224,10 @@ export class ExpenseService {
           isCounted: true,
           spentDate: Between(startDate, endDate),
         },
+        select: {
+          category: true,
+          amount: true,
+        },
       });
     } catch (error) {
       console.error(error);
