@@ -10,10 +10,6 @@ export class ExpenseLib {
     return await this.expenseService.getPreviousExpense(userId);
   }
 
-  async getTodaysExpenses(userId: number): Promise<Expense[]> {
-    return await this.expenseService.getTodaysExpenses(userId);
-  }
-
   async getExpensesInDateRange(
     userId: number,
     startOfMonth: Date,

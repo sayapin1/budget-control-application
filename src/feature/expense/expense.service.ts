@@ -10,7 +10,7 @@ import { CreateExpenseDto } from './dto/createExpense.dto';
 import { GetExpenseDto } from './dto/getExpense.dto';
 import { UpdateExpenseDto } from './dto/updateExpense.dto';
 import { Expense } from '../../entity/expense.entity';
-import { format } from 'date-fns';
+import { parse } from 'date-fns';
 
 @Injectable()
 export class ExpenseService {
@@ -124,9 +124,15 @@ export class ExpenseService {
     createExpenseDto: CreateExpenseDto,
   ): Promise<void> {
     try {
+      const spentDate = parse(
+        createExpenseDto.spentDate,
+        'yyyy-MM-dd',
+        new Date(),
+      );
+
       await this.expenseRepository.save({
         user: { id: userId },
-        spentDate: createExpenseDto.spentDate,
+        spentDate,
         category: createExpenseDto.category,
         amount: createExpenseDto.amount,
         memo: createExpenseDto.memo,
@@ -206,45 +212,17 @@ export class ExpenseService {
     }
   }
 
-  /* 오늘 지출한 내역 가져오기 */
-  async getTodaysExpenses(userId: number): Promise<Expense[]> {
+  /* 달의 지정일 부터 지정일까지 총 지출 내역 가져오기 */
+  async getExpensesInDateRange(userId: number, startDate: Date, endDate: Date) {
     try {
-      const today = new Date();
-      const todayFormatted = `${today.getFullYear()}-${
-        today.getMonth() + 1
-      }-${today.getDate()}`;
+      // const today = (new Date(), 'yyyy-MM-dd');
+      // const todayFormatted = parse(today, 'yyyy-MM-dd', new Date());
 
       return await this.expenseRepository.find({
         where: {
           user: { id: userId },
           isCounted: true,
-          spentDate: todayFormatted,
-        },
-        select: {
-          category: true,
-          amount: true,
-        },
-      });
-    } catch (error) {
-      console.error(error);
-      throw new InternalServerErrorException();
-    }
-  }
-
-  /* 달의 시작일 부터 현재까지의 총 지출 내역 가져오기 */
-  async getExpensesInDateRange(
-    userId: number,
-    startOfMonth: Date,
-    currentDate: Date,
-  ) {
-    try {
-      const formattedStartOfMonth = format(startOfMonth, 'yyyy-MM-dd');
-      const formattedCurrentDate = format(currentDate, 'yyyy-MM-dd');
-
-      return await this.expenseRepository.find({
-        where: {
-          user: { id: userId },
-          spentDate: Between(formattedStartOfMonth, formattedCurrentDate),
+          spentDate: Between(startDate, endDate),
         },
       });
     } catch (error) {
