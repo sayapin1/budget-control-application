@@ -10,7 +10,7 @@ import { CreateExpenseDto } from './dto/createExpense.dto';
 import { GetExpenseDto } from './dto/getExpense.dto';
 import { UpdateExpenseDto } from './dto/updateExpense.dto';
 import { Expense } from '../../entity/expense.entity';
-import { parse, format } from 'date-fns';
+import { parse } from 'date-fns';
 
 @Injectable()
 export class ExpenseService {
@@ -242,17 +242,16 @@ export class ExpenseService {
     targetDate: Date,
   ): Promise<Expense[]> {
     try {
-      return await this.expenseRepository.find({
-        where: {
-          user: { id: userId },
-          isCounted: true,
-          spentDate: targetDate,
-        },
-        select: {
-          category: true,
-          amount: true,
-        },
-      });
+      const formattedDate = new Date(targetDate.toISOString().split('T')[0]);
+      return await this.expenseRepository
+        .createQueryBuilder('expense')
+        .where('expense.user.id = :userId', { userId })
+        .andWhere('expense.isCounted = :isCounted', { isCounted: true })
+        .andWhere('DATE(expense.spentDate) = DATE(:formattedDate)', {
+          formattedDate,
+        })
+        .select(['expense.category', 'expense.amount'])
+        .getMany();
     } catch (error) {
       console.error(error);
       throw new InternalServerErrorException();
