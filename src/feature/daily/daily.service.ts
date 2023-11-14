@@ -27,39 +27,48 @@ export class DailyService {
     categoryAmounts: Record<string, number>;
     message: string;
   }> {
-    const monthlyBudget = await this.budgetLib.getMonthlyBudget(userId); //설정한 이번달 총 예산
-    console.log('monthlyBudget:', monthlyBudget);
+    //현재 달 찾기
+    const today = new Date();
+    const thisYear = today.getFullYear();
+    const thisMonth = today.getMonth() + 1;
+    const formattedMonth = thisMonth < 10 ? `0${thisMonth}` : thisMonth;
+    const thisYearMonth = `${thisYear}-${formattedMonth}`;
+
+    const monthlyBudgetByCategory = await this.budgetLib.getBudgetSettingsById(
+      userId,
+      thisYearMonth,
+    ); //설정한 이번달 카테고리 별 예산
+
+    const monthlyBudgetTotal = monthlyBudgetByCategory.total; //설정한 이번달 총 예산
 
     const previousExpenses = await this.expenseLib.getPreviousExpense(userId); //이번달 동안 사용한 총 지출 계산
-    console.log('previousExpenses:', previousExpenses);
+
     const minAmount = 1000; // 최소 금액 설정
 
     // 이후 일자 동안의 예산 계산
     const remainingDays = this.getRemainingDaysInMonth();
-    console.log('remainingDays:', remainingDays);
+
     const dailyBudget = Math.max(
       minAmount,
-      (monthlyBudget - previousExpenses) / remainingDays,
+      (monthlyBudgetTotal - previousExpenses) / remainingDays,
     );
-    console.log('dailyBudget:', dailyBudget);
 
-    // 오늘 예산 계산
+    // 오늘 예산 계산(1000원 미만일 경우 1000원이 표시되도록 합니다).
     const todayBudget = Math.max(minAmount, dailyBudget);
-    console.log('todayBudget:', todayBudget);
+
+    // 오늘 예산을 사용자 친화적으로 변환
+    const roundedTodayBudget = Math.round(todayBudget / 100) * 100;
 
     const categoryBudgets: Record<string, number> = {};
-    const categories = Object.keys(previousExpenses);
+    const { id, month, total, ...categories } = monthlyBudgetByCategory;
 
-    // 각 카테고리에 할당할 금액 계산
-    categories.forEach((category) => {
-      const categoryBudget = monthlyBudget / categories.length;
+    // 각 카테고리에 할당할 금액 계산 및 카테고리별 금액을 사용자 친화적으로 변환
+    Object.entries(categories).forEach(([category, amount]) => {
+      const categoryRatio = Number(amount) / total;
+      const categoryBudget =
+        Math.round((roundedTodayBudget * categoryRatio) / 100) * 100;
       categoryBudgets[category] = Math.max(minAmount, categoryBudget);
     });
-
-    console.log('categoryBudgets:', categoryBudgets);
-
-    // 금액을 사용자 친화적으로 변환
-    const roundedTodayBudget = Math.round(todayBudget / 100) * 100;
 
     // 사용자 상황에 맞는 멘트 생성
     let message;

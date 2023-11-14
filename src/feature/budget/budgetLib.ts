@@ -5,7 +5,10 @@ import { BudgetService } from './budget.service';
 export class BudgetLib {
   constructor(private readonly budgetService: BudgetService) {}
 
-  async getMonthlyBudget(userId: number): Promise<number> {
-    return await this.budgetService.getMonthlyBudget(userId);
+  async getBudgetSettingsById(
+    userId: number,
+    targetMonth: string,
+  ): Promise<any> {
+    return await this.budgetService.getBudgetSettingsById(userId, targetMonth);
   }
 }

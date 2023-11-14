@@ -11,7 +11,6 @@ import { Repository } from 'typeorm';
 import { Budget } from '../../entity/budget.entity';
 import { FailType } from '../../enum/failType.enum';
 import { CreateBudgetDto } from './dto/createBudget.dto';
-import { YearMonthQueryDto } from './dto/yearMonthQuery.dto';
 import { UpdateBudgetDto } from './dto/updateBudget.dto';
 import { StatisticsLib } from '../statistics/statisticsLib';
 
@@ -163,26 +162,5 @@ export class BudgetService {
     }
 
     return recommendedBudget;
-  }
-
-  /* db에서 사용자 id가 가진 이번달 총 예산을 가져오기 */
-  async getMonthlyBudget(userId: number): Promise<number> {
-    const today = new Date();
-    const thisYear = today.getFullYear();
-    const thisMonth = today.getMonth() + 1;
-
-    const formattedMonth = thisMonth < 10 ? `0${thisMonth}` : thisMonth;
-
-    const thisYearMonth = `${thisYear}-${formattedMonth}`;
-
-    const result = await this.budgetRepository
-      .createQueryBuilder('budget')
-      .select(['budget.total'])
-      .where('budget.user.id = :userId', { userId })
-      .andWhere('budget.month = :month', { month: thisYearMonth })
-      .leftJoinAndSelect('budget.user', 'user')
-      .getOne();
-
-    return result.total;
   }
 }
