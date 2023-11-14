@@ -141,8 +141,20 @@ export class DailyService {
       categoryAppropriateAmount: recommendationResult.categoryAmounts,
       todaySpentAmount: todaysTotalExpense,
       todayDangerPercentage:
-        (todaysTotalExpense / recommendationResult.totalAmount) * 100 || 0,
-      categoryStats: categoryStats,
+        Math.round(
+          (todaysTotalExpense / recommendationResult.totalAmount) * 100 || 0,
+        ) + '%',
+      categoryStats: Object.fromEntries(
+        Object.entries(categoryStats).map(([category, stats]) => {
+          return [
+            category,
+            {
+              ...stats,
+              dangerPercentage: Math.round(stats.dangerPercentage) + '%',
+            },
+          ];
+        }),
+      ),
     };
   }
 
