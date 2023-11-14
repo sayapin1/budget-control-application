@@ -28,47 +28,40 @@ export class BudgetService {
   async getBudgetSettingsById(
     userId: number,
     yearMonthQueryDto: YearMonthQueryDto,
-  ): Promise<Budget> {
+  ): Promise<any> {
     const { year, month } = yearMonthQueryDto;
     const targetMonth = `${year}-${month}`;
 
-    const queryBuilder = this.budgetRepository.createQueryBuilder('budget');
-
-    console.log('*******', userId);
-
-    queryBuilder.select([
-      'budget.id',
-      'budget.user_id',
-      'budget.total',
-      'budget.month',
-    ]);
-
-    const nullableColumns = [
-      'budget.food',
-      'budget.transport',
-      'budget.living',
-      'budget.hobby',
-      'budget.culture',
-      'budget.health',
-      'budget.shopping',
-      'budget.education',
-      'budget.saving',
-      'budget.etc',
-    ];
-    for (const column of nullableColumns) {
-      queryBuilder.andWhere(`budget.${column} IS NOT NULL`);
-    }
-
-    const budget = await queryBuilder
-      .andWhere('budget.user_id = :userId', { userId })
-      .andWhere('budget.month = :targetMonth', { targetMonth })
-      .getOne();
+    const budget = await this.budgetRepository.findOne({
+      select: {
+        id: true,
+        total: true,
+        month: true,
+        food: true,
+        transport: true,
+        living: true,
+        hobby: true,
+        culture: true,
+        health: true,
+        shopping: true,
+        education: true,
+        saving: true,
+        etc: true,
+        user: { id: true },
+      },
+      where: {
+        user: { id: userId },
+        month: targetMonth,
+      },
+    });
 
     if (!budget) {
       throw new NotFoundException(FailType.BUDGET_NOT_FOUND);
     }
 
-    return budget;
+    return Object.fromEntries(
+      Object.entries(budget).filter(([key, value]) => value !== null),
+    );
   }
 
   async setBudgets(
@@ -161,6 +154,7 @@ export class BudgetService {
       await this.cacheManager.set(
         'averageBudget',
         JSON.stringify(budgetStatistics),
+        { ttl: 0 },
       );
     }
 
@@ -170,7 +164,7 @@ export class BudgetService {
     for (const category in parsedBudgetStatistics) {
       if (parsedBudgetStatistics.hasOwnProperty(category)) {
         const categoryBudget = total * parsedBudgetStatistics[category];
-        recommendedBudget[category] = categoryBudget;
+        recommendedBudget[category] = Math.round(categoryBudget / 100) * 100;
       }
     }
 
