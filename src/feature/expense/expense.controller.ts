@@ -26,33 +26,25 @@ export class ExpenseController {
   /* 지출 상세 조회 */
   @Get('/record/:expenseId')
   async getExpenseById(@Param('expenseId') expenseId: number) {
-    try {
-      const expenseDetail = await this.expenseService.getExpenseById(expenseId);
-      return {
-        message: SuccessType.EXPENSE_DETAIL_GET,
-        data: expenseDetail,
-      };
-    } catch (error) {
-      error.message;
-    }
+    const expenseDetail = await this.expenseService.getExpenseById(expenseId);
+    return {
+      message: SuccessType.EXPENSE_DETAIL_GET,
+      data: expenseDetail,
+    };
   }
 
   /* 지출 목록 조회
    * Query를 통해 필수적으로 기간을 받고,  조회 조건에 category, 최소, 최대 금액 입력*/
   @Get('/record')
   async getExpenseListByQuery(@Query() getExpenseDto: GetExpenseDto) {
-    try {
-      const expenseList = await this.expenseService.getExpenseListByQuery(
-        getExpenseDto,
-      );
+    const expenseList = await this.expenseService.getExpenseListByQuery(
+      getExpenseDto,
+    );
 
-      return {
-        message: SuccessType.EXPENSE_LIST_GET,
-        data: expenseList,
-      };
-    } catch (error) {
-      error.message;
-    }
+    return {
+      message: SuccessType.EXPENSE_LIST_GET,
+      data: expenseList,
+    };
   }
 
   /* 지출 생성 */
@@ -61,15 +53,11 @@ export class ExpenseController {
     @Req() req,
     @Body(ValidationPipe) createExpenseDto: CreateExpenseDto,
   ) {
-    try {
-      await this.expenseService.createExpense(req.user.id, createExpenseDto);
+    await this.expenseService.createExpense(req.user.id, createExpenseDto);
 
-      return {
-        message: SuccessType.EXPENSE_CREATE,
-      };
-    } catch (error) {
-      error.message;
-    }
+    return {
+      message: SuccessType.EXPENSE_CREATE,
+    };
   }
 
   /* 지출 수정 */
@@ -78,28 +66,20 @@ export class ExpenseController {
     @Body(ValidationPipe) updateExpenseDto: UpdateExpenseDto,
     @Param('expenseId') expenseId: number,
   ) {
-    try {
-      await this.expenseService.updateExpense(expenseId, updateExpenseDto);
+    await this.expenseService.updateExpense(expenseId, updateExpenseDto);
 
-      return {
-        message: SuccessType.EXPENSE_UPDATE,
-      };
-    } catch (error) {
-      error.message;
-    }
+    return {
+      message: SuccessType.EXPENSE_UPDATE,
+    };
   }
 
   /* 지출 삭제 */
   @Delete('/record/:expenseId')
   async deleteExpense(@Param('expenseId') expenseId: number) {
-    try {
-      await this.expenseService.deleteExpense(expenseId);
+    await this.expenseService.deleteExpense(expenseId);
 
-      return {
-        message: SuccessType.EXPENSE_DELETE,
-      };
-    } catch (error) {
-      error.message;
-    }
+    return {
+      message: SuccessType.EXPENSE_DELETE,
+    };
   }
 }
