@@ -47,17 +47,27 @@ export class ExpenseService {
     return expenseDetail;
   }
 
-  async getExpenseListByQuery(
-    getExpenseDto: GetExpenseDto,
-  ): Promise<Expense[]> {
+  async getExpenseListByQuery(getExpenseDto: GetExpenseDto): Promise<{
+    expenses: Expense[];
+    totalAmount: number;
+    categoryTotalAmounts: Record<string, number>;
+  }> {
     const { start, end, category, minimum, maximum } = getExpenseDto;
 
     const queryBuilder = this.expenseRepository.createQueryBuilder('expense');
 
+    queryBuilder.select([
+      'expense.id',
+      'expense.spentDate',
+      'expense.category',
+      'expense.amount',
+      'expense.isCounted',
+    ]);
+
     // 1. start와 end를 통한 기간 필터링
     if (start && end) {
-      queryBuilder.andWhere('expense.date >= :start', { start });
-      queryBuilder.andWhere('expense.date <= :end', { end });
+      queryBuilder.andWhere('expense.spentDate >= :start', { start });
+      queryBuilder.andWhere('expense.spentDate <= :end', { end });
     }
 
     // 2. category 필터링
@@ -75,7 +85,27 @@ export class ExpenseService {
     }
 
     // 4. 모든 조건을 합쳐서 조회
-    return await queryBuilder.getMany();
+    const expenses = await queryBuilder.getMany();
+
+    // 5. 지출 합계 및 카테고리 별 지출 합계 계산
+    const totalAmount = expenses
+      .filter((expense) => expense.isCounted) // Filter out expenses with isCounted false
+      .reduce((sum, expense) => sum + expense.amount, 0);
+
+    // 카테고리 별 합계 계산
+    const categoryTotalAmounts = expenses.reduce((result, expense) => {
+      const category = expense.category;
+      if (expense.isCounted) {
+        result[category] = (result[category] || 0) + expense.amount;
+      }
+      return result;
+    }, {});
+
+    return {
+      expenses,
+      totalAmount,
+      categoryTotalAmounts,
+    };
   }
 
   async createExpense(
@@ -126,7 +156,7 @@ export class ExpenseService {
         throw new NotFoundException(FailType.EXPENSE_NOT_FOUND);
       }
 
-      await this.expenseRepository.delete(expense);
+      await this.expenseRepository.delete(expenseId);
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw new NotFoundException(FailType.EXPENSE_NOT_FOUND);
