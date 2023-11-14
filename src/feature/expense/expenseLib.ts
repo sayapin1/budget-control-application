@@ -6,10 +6,6 @@ import { Expense } from '../../entity/expense.entity';
 export class ExpenseLib {
   constructor(private readonly expenseService: ExpenseService) {}
 
-  async getPreviousExpense(userId: number): Promise<number> {
-    return await this.expenseService.getPreviousExpense(userId);
-  }
-
   async getExpensesInDateRange(
     userId: number,
     startOfMonth: Date,

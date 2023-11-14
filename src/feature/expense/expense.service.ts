@@ -189,29 +189,6 @@ export class ExpenseService {
     });
   }
 
-  /* 해당 월에 사용했던 총 지출 계산 */
-  async getPreviousExpense(userId: number): Promise<number> {
-    try {
-      const today = new Date();
-      const thisYear = today.getFullYear();
-      const thisMonth = today.getMonth() + 1;
-
-      const expenses = await this.expenseRepository
-        .createQueryBuilder('expense')
-        .where('expense.user_id = :userId', { userId })
-        .andWhere('YEAR(expense.spentDate) = :year', { year: thisYear })
-        .andWhere('MONTH(expense.spentDate) = :month', { month: thisMonth })
-        .andWhere('expense.is_counted = true')
-        .select('SUM(expense.amount)', 'totalAmount')
-        .getRawOne();
-
-      return expenses ? expenses.totalAmount : 0;
-    } catch (error) {
-      console.error(error);
-      throw new InternalServerErrorException();
-    }
-  }
-
   /* 달의 지정일 부터 지정일까지 총 지출 내역 가져오기 */
   async getExpensesInDateRange(
     userId: number,
