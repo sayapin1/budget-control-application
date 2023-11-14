@@ -10,6 +10,7 @@ import { ExpenseLib } from '../expense/expenseLib';
 import { StatisticsLib } from '../statistics/statisticsLib';
 import { BudgetLib } from '../budget/budgetLib';
 import { UtilService } from '../../util/util.service';
+import { startOfMonth } from 'date-fns';
 
 @Injectable()
 export class DailyService {
@@ -35,6 +36,7 @@ export class DailyService {
     const thisMonth = today.getMonth() + 1;
     const formattedMonth = thisMonth < 10 ? `0${thisMonth}` : thisMonth;
     const thisYearMonth = `${thisYear}-${formattedMonth}`;
+    const startOfMonthDate = startOfMonth(new Date());
 
     const monthlyBudgetByCategory = await this.budgetLib.getBudgetSettingsById(
       userId,
@@ -43,7 +45,14 @@ export class DailyService {
 
     const monthlyBudgetTotal = monthlyBudgetByCategory.total; //설정한 이번달 총 예산
 
-    const previousExpenses = await this.expenseLib.getPreviousExpense(userId); //이번달 동안 사용한 총 지출 계산
+    const previousExpenses = await this.expenseLib.getExpensesInDateRange(
+      userId,
+      startOfMonthDate,
+      today,
+    );
+
+    const totalExpenses =
+      this.utilService.calculateTotalAmount(previousExpenses); //이번달 동안 사용한 총 지출 계산
 
     const minAmount = 1000; // 최소 금액 설정
 
@@ -52,7 +61,7 @@ export class DailyService {
 
     const dailyBudget = Math.max(
       minAmount,
-      (monthlyBudgetTotal - previousExpenses) / remainingDays,
+      (monthlyBudgetTotal - totalExpenses) / remainingDays,
     );
 
     // 오늘 예산 계산(1000원 미만일 경우 1000원이 표시되도록 합니다).
@@ -83,6 +92,12 @@ export class DailyService {
     } else {
       message = '적당한 금액으로 지출하고 계시네요. 잘하고 있어요!';
     }
+
+    await this.cacheManager.set(
+      `todayTotalBudgetBy${userId}`,
+      roundedTodayBudget,
+      { ttl: 0 },
+    );
 
     return {
       totalAmount: roundedTodayBudget,

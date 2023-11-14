@@ -12,9 +12,9 @@ import { UtilModule } from '../../util/util.module';
   imports: [
     TypeOrmModule.forFeature([Expense]),
     ExpenseModule,
-    StatisticsModule,
     BudgetModule,
     UtilModule,
+    StatisticsModule,
   ],
   controllers: [DailyController],
   providers: [DailyService],
