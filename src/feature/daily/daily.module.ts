@@ -6,6 +6,7 @@ import { DailyService } from './daily.service';
 import { BudgetModule } from '../budget/budget.module';
 import { ExpenseModule } from '../expense/expense.module';
 import { StatisticsModule } from '../statistics/statistics.module';
+import { UtilModule } from '../../util/util.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { StatisticsModule } from '../statistics/statistics.module';
     ExpenseModule,
     StatisticsModule,
     BudgetModule,
+    UtilModule,
   ],
   controllers: [DailyController],
   providers: [DailyService],

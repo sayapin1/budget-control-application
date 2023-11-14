@@ -9,6 +9,7 @@ import { Expense } from '../../entity/expense.entity';
 import { ExpenseLib } from '../expense/expenseLib';
 import { StatisticsLib } from '../statistics/statisticsLib';
 import { BudgetLib } from '../budget/budgetLib';
+import { UtilService } from '../../util/util.service';
 
 @Injectable()
 export class DailyService {
@@ -18,6 +19,7 @@ export class DailyService {
     private readonly expenseLib: ExpenseLib,
     private readonly statisticsLib: StatisticsLib,
     private readonly budgetLib: BudgetLib,
+    private readonly utilService: UtilService,
     @Inject(CACHE_MANAGER)
     private cacheManager: Cache,
   ) {}
@@ -134,7 +136,8 @@ export class DailyService {
         (spentAmount / recommendedAmount) * 100 || 0;
     });
 
-    const todaysTotalExpense = this.calculateTotalAmount(todayExpenses);
+    const todaysTotalExpense =
+      this.utilService.calculateTotalAmount(todayExpenses);
 
     return {
       totalAppropriateAmount: recommendationResult.totalAmount,
@@ -156,11 +159,6 @@ export class DailyService {
         }),
       ),
     };
-  }
-
-  // 주어진 지출 내역의 총액을 계산.
-  calculateTotalAmount(expenses: Expense[]): number {
-    return expenses.reduce((total, expense) => total + expense.amount, 0);
   }
 
   @Cron('0 9 * * 1')

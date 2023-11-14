@@ -15,6 +15,7 @@ import { BudgetModule } from './feature/budget/budget.module';
 import { DailyModule } from './feature/daily/daily.module';
 import { ExpenseModule } from './feature/expense/expense.module';
 import { StatisticsModule } from './feature/statistics/statistics.module';
+import { UtilModule } from './util/util.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { StatisticsModule } from './feature/statistics/statistics.module';
     DailyModule,
     ExpenseModule,
     StatisticsModule,
+    UtilModule,
   ],
   providers: [],
 })
