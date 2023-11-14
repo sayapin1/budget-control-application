@@ -5,5 +5,5 @@ import { CreateExpenseDto } from './createExpense.dto';
 export class UpdateExpenseDto extends PartialType(CreateExpenseDto) {
   @IsBoolean()
   @IsOptional()
-  is_counted?: boolean;
+  isCounted?: boolean;
 }

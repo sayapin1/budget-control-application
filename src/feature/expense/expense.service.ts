@@ -28,7 +28,6 @@ export class ExpenseService {
         spentDate: true,
         category: true,
         amount: true,
-        createdAt: true,
         memo: true,
         isCounted: true,
         user: {
@@ -76,8 +75,7 @@ export class ExpenseService {
     }
 
     // 4. 모든 조건을 합쳐서 조회
-    const expenseList = await queryBuilder.getMany();
-    return expenseList;
+    return await queryBuilder.getMany();
   }
 
   async createExpense(
@@ -85,7 +83,7 @@ export class ExpenseService {
     createExpenseDto: CreateExpenseDto,
   ): Promise<void> {
     try {
-      await this.expenseRepository.create({
+      await this.expenseRepository.save({
         user: { id: userId },
         spentDate: createExpenseDto.spentDate,
         category: createExpenseDto.category,
@@ -112,7 +110,11 @@ export class ExpenseService {
 
       await this.expenseRepository.save(expense);
     } catch (error) {
-      throw new InternalServerErrorException(FailType.EXPENSE_UPDATE_FAIL);
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(FailType.EXPENSE_NOT_FOUND);
+      } else {
+        throw new InternalServerErrorException(FailType.EXPENSE_UPDATE_FAIL);
+      }
     }
   }
 
@@ -126,7 +128,11 @@ export class ExpenseService {
 
       await this.expenseRepository.delete(expense);
     } catch (error) {
-      throw new InternalServerErrorException(FailType.EXPENSE_DELETE_FAIL);
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(FailType.EXPENSE_NOT_FOUND);
+      } else {
+        throw new InternalServerErrorException(FailType.EXPENSE_DELETE_FAIL);
+      }
     }
   }
 
