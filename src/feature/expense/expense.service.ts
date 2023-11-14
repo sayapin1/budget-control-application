@@ -10,7 +10,7 @@ import { CreateExpenseDto } from './dto/createExpense.dto';
 import { GetExpenseDto } from './dto/getExpense.dto';
 import { UpdateExpenseDto } from './dto/updateExpense.dto';
 import { Expense } from '../../entity/expense.entity';
-import { parse } from 'date-fns';
+import { parse, format } from 'date-fns';
 
 @Injectable()
 export class ExpenseService {
@@ -213,16 +213,40 @@ export class ExpenseService {
   }
 
   /* 달의 지정일 부터 지정일까지 총 지출 내역 가져오기 */
-  async getExpensesInDateRange(userId: number, startDate: Date, endDate: Date) {
+  async getExpensesInDateRange(
+    userId: number,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<Expense[]> {
     try {
-      // const today = (new Date(), 'yyyy-MM-dd');
-      // const todayFormatted = parse(today, 'yyyy-MM-dd', new Date());
-
       return await this.expenseRepository.find({
         where: {
           user: { id: userId },
           isCounted: true,
           spentDate: Between(startDate, endDate),
+        },
+        select: {
+          category: true,
+          amount: true,
+        },
+      });
+    } catch (error) {
+      console.error(error);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  /* 지정한 날의 지출 내역 가져오기 */
+  async getExpensesByDate(
+    userId: number,
+    targetDate: Date,
+  ): Promise<Expense[]> {
+    try {
+      return await this.expenseRepository.find({
+        where: {
+          user: { id: userId },
+          isCounted: true,
+          spentDate: targetDate,
         },
         select: {
           category: true,

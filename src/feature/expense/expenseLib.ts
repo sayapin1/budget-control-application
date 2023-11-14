@@ -14,11 +14,18 @@ export class ExpenseLib {
     userId: number,
     startOfMonth: Date,
     currentDate: Date,
-  ) {
+  ): Promise<Expense[]> {
     return await this.expenseService.getExpensesInDateRange(
       userId,
       startOfMonth,
       currentDate,
     );
+  }
+
+  async getExpensesByDate(
+    userId: number,
+    targetDate: Date,
+  ): Promise<Expense[]> {
+    return await this.expenseService.getExpensesByDate(userId, targetDate);
   }
 }
