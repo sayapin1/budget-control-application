@@ -1,4 +1,10 @@
-import { IsDateString, IsEnum, IsInt, IsOptional } from 'class-validator';
+import {
+  IsDateString,
+  IsEnum,
+  IsInt,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { ExpenseCategory } from '../../../enum/expenseCategory.enum';
 
 export class GetExpenseDto {
@@ -12,11 +18,11 @@ export class GetExpenseDto {
   @IsOptional()
   category?: ExpenseCategory;
 
-  @IsInt()
+  @IsString()
   @IsOptional()
-  minimum?: number;
+  minimum?: string;
 
-  @IsInt()
+  @IsString()
   @IsOptional()
-  maximum?: number;
+  maximum?: string;
 }
