@@ -1,4 +1,4 @@
-import { StatisticsType } from '../../../enum/statisticsType';
+import { StatisticsType } from '../../../enum/statisticsType.enum';
 import { IsEnum } from 'class-validator';
 
 export class GetExpenseStatisticsDto {
