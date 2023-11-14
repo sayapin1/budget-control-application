@@ -19,7 +19,7 @@ export class Expense {
   user!: User;
 
   @Column({ type: 'date' })
-  spentDate!: string;
+  spentDate!: Date;
 
   @Column()
   category!: string;
