@@ -5,9 +5,15 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { StatisticsController } from './statistics.controller';
 import { StatisticsService } from './statistics.service';
 import { StatisticsLib } from './statisticsLib';
+import { ExpenseModule } from '../expense/expense.module';
+import { UtilModule } from '../../util/util.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Expense, Budget])],
+  imports: [
+    TypeOrmModule.forFeature([Expense, Budget]),
+    ExpenseModule,
+    UtilModule,
+  ],
   controllers: [StatisticsController],
   providers: [StatisticsService, StatisticsLib],
   exports: [StatisticsLib],
