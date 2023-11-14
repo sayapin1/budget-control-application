@@ -93,7 +93,11 @@ export class DailyService {
 
   async getTodaysExpenseGuide(userId: number) {
     // 오늘 지출한 내용을 가져오기
-    const todayExpenses = await this.expenseLib.getTodaysExpenses(userId);
+    const todayExpenses = await this.expenseLib.getExpensesInDateRange(
+      userId,
+      new Date(),
+      new Date(),
+    );
 
     const recommendationResult = await this.getTodaysExpenseRecommendation(
       userId,
