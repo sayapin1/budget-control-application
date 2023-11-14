@@ -27,11 +27,8 @@ export class BudgetService {
 
   async getBudgetSettingsById(
     userId: number,
-    yearMonthQueryDto: YearMonthQueryDto,
+    targetMonth: string,
   ): Promise<any> {
-    const { year, month } = yearMonthQueryDto;
-    const targetMonth = `${year}-${month}`;
-
     const budget = await this.budgetRepository.findOne({
       select: {
         id: true,
@@ -67,12 +64,9 @@ export class BudgetService {
   async setBudgets(
     userId: number,
     createBudgetDto: CreateBudgetDto,
-    yearMonthQueryDto: YearMonthQueryDto,
+    targetMonth: string,
   ): Promise<void> {
     try {
-      const { year, month } = yearMonthQueryDto;
-      const targetMonth = `${year}-${month}`;
-
       const total = Object.values(createBudgetDto).reduce(
         (sum, value) => (sum += value || 0),
         0,
@@ -181,18 +175,13 @@ export class BudgetService {
 
     const thisYearMonth = `${thisYear}-${formattedMonth}`;
 
-    const result = await this.budgetRepository.findOne({
-      where: {
-        user: { id: userId },
-        month: thisYearMonth,
-      },
-      select: {
-        total: true,
-      },
-      relations: {
-        user: true,
-      },
-    });
+    const result = await this.budgetRepository
+      .createQueryBuilder('budget')
+      .select(['budget.total'])
+      .where('budget.user.id = :userId', { userId })
+      .andWhere('budget.month = :month', { month: thisYearMonth })
+      .leftJoinAndSelect('budget.user', 'user')
+      .getOne();
 
     return result.total;
   }

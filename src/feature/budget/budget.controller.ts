@@ -29,9 +29,12 @@ export class BudgetController {
     @Query() yearMonthQueryDto: YearMonthQueryDto,
     @Req() req,
   ) {
+    const { year, month } = yearMonthQueryDto;
+    const targetMonth = `${year}-${month}`;
+
     const budget = await this.budgetService.getBudgetSettingsById(
       req.user.id,
-      yearMonthQueryDto,
+      targetMonth,
     );
 
     return {
@@ -48,10 +51,13 @@ export class BudgetController {
     @Body(ValidationPipe) createBudgetDto: CreateBudgetDto,
     @Query() yearMonthQueryDto: YearMonthQueryDto,
   ) {
+    const { year, month } = yearMonthQueryDto;
+    const targetMonth = `${year}-${month}`;
+
     await this.budgetService.setBudgets(
       req.user.id,
       createBudgetDto,
-      yearMonthQueryDto,
+      targetMonth,
     );
 
     return {
