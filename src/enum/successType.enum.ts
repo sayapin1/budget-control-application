@@ -13,4 +13,5 @@ export enum SuccessType {
   EXPENSE_LIST_GET = '지출 목록 불러오기 성공',
   EXPENSE_RECOMMENDATION_GET = '오늘의 추천 지출은?',
   EXPENSE_GUIDE_GET = '오늘의 총 지출은?',
+  STATISTICS_GET = '통계 불러오기 성공',
 }
