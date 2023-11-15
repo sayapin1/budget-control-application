@@ -10,13 +10,16 @@ import { CreateExpenseDto } from './dto/createExpense.dto';
 import { GetExpenseDto } from './dto/getExpense.dto';
 import { UpdateExpenseDto } from './dto/updateExpense.dto';
 import { Expense } from '../../entity/expense.entity';
-import { parse } from 'date-fns';
+import { MonthlyExpense } from '../../entity/monthlyExpense.entity';
+import { parse, format } from 'date-fns';
 
 @Injectable()
 export class ExpenseService {
   constructor(
     @InjectRepository(Expense)
     private readonly expenseRepository: Repository<Expense>,
+    @InjectRepository(MonthlyExpense)
+    private readonly monthlyExpenseRepository: Repository<MonthlyExpense>,
   ) {}
 
   async getExpenseById(expenseId: number): Promise<Expense> {
@@ -137,6 +140,24 @@ export class ExpenseService {
         amount: createExpenseDto.amount,
         memo: createExpenseDto.memo,
       });
+
+      const spentMonth = createExpenseDto.spentDate.substring(0, 7);
+
+      const monthlyExpense = await this.monthlyExpenseRepository.findOne({
+        where: { user: { id: userId }, month: spentMonth },
+      });
+
+      if (monthlyExpense) {
+        // MonthlyExpense가 이미 존재하면 totalExpense 업데이트
+        monthlyExpense.totalExpense += createExpenseDto.amount;
+      } else {
+        // MonthlyExpense가 없으면 새로 생성
+        await this.monthlyExpenseRepository.save({
+          user: { id: userId },
+          month: spentMonth,
+          totalExpense: createExpenseDto.amount,
+        });
+      }
     } catch (error) {
       throw new InternalServerErrorException(FailType.EXPENSE_CREATE_FAIL);
     }
@@ -153,9 +174,23 @@ export class ExpenseService {
         throw new NotFoundException(FailType.EXPENSE_NOT_FOUND);
       }
 
+      const originalAmount = expense.amount;
+
       Object.assign(expense, updateExpenseDto);
 
       await this.expenseRepository.save(expense);
+
+      // 해당 사용자 및 월에 해당하는 MonthlyExpense 조회
+      const spentMonth = format(expense.spentDate, 'yyyy-MM');
+
+      const monthlyExpense = await this.monthlyExpenseRepository.findOne({
+        where: { user: { id: expense.user.id }, month: spentMonth },
+      });
+
+      if (monthlyExpense) {
+        monthlyExpense.totalExpense += expense.amount - originalAmount;
+        await this.monthlyExpenseRepository.save(monthlyExpense);
+      }
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw new NotFoundException(FailType.EXPENSE_NOT_FOUND);
@@ -171,6 +206,17 @@ export class ExpenseService {
 
       if (!expense) {
         throw new NotFoundException(FailType.EXPENSE_NOT_FOUND);
+      }
+
+      const spentMonth = format(expense.spentDate, 'yyyy-MM');
+
+      const monthlyExpense = await this.monthlyExpenseRepository.findOne({
+        where: { user: { id: expense.user.id }, month: spentMonth },
+      });
+
+      if (monthlyExpense) {
+        monthlyExpense.totalExpense -= expense.amount;
+        await this.monthlyExpenseRepository.save(monthlyExpense);
       }
 
       await this.expenseRepository.delete(expenseId);
