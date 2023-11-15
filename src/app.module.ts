@@ -9,6 +9,7 @@ import * as redisStore from 'cache-manager-ioredis';
 import { User } from './entity/user.entity';
 import { Budget } from './entity/budget.entity';
 import { Expense } from './entity/expense.entity';
+import { MonthlyExpense } from './entity/monthlyExpense.entity';
 
 import { AuthModule } from './feature/auth/auth.module';
 import { BudgetModule } from './feature/budget/budget.module';
@@ -40,7 +41,7 @@ import { UtilModule } from './util/util.module';
           username: configService.get<string>('DB_USERNAME'),
           password: configService.get<string>('DB_PASSWORD'),
           database: configService.get<string>('DB_DATABASE'),
-          entities: [User, Budget, Expense],
+          entities: [User, Budget, Expense, MonthlyExpense],
           synchronize: true, // 사용시에만 true
           logging: configService.get<string>('NODE_ENV') === 'local',
           namingStrategy: new SnakeNamingStrategy(), // 컬럼명 snake case로 변환

@@ -7,12 +7,14 @@ import { StatisticsService } from './statistics.service';
 import { StatisticsLib } from './statisticsLib';
 import { ExpenseModule } from '../expense/expense.module';
 import { UtilModule } from '../../util/util.module';
+import { BudgetModule } from '../budget/budget.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Expense, Budget]),
     ExpenseModule,
     UtilModule,
+    BudgetModule,
   ],
   controllers: [StatisticsController],
   providers: [StatisticsService, StatisticsLib],
