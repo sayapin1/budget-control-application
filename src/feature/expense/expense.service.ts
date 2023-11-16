@@ -126,6 +126,12 @@ export class ExpenseService {
     userId: number,
     createExpenseDto: CreateExpenseDto,
   ): Promise<void> {
+    const queryRunner =
+      this.expenseRepository.manager.connection.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
     try {
       const spentDate = parse(
         createExpenseDto.spentDate,
@@ -143,23 +149,29 @@ export class ExpenseService {
 
       const spentMonth = createExpenseDto.spentDate.substring(0, 7);
 
-      const monthlyExpense = await this.monthlyExpenseRepository.findOne({
+      const monthlyExpense = await queryRunner.manager.findOne(MonthlyExpense, {
         where: { user: { id: userId }, month: spentMonth },
       });
 
       if (monthlyExpense) {
         // MonthlyExpense가 이미 존재하면 totalExpense 업데이트
         monthlyExpense.totalExpense += createExpenseDto.amount;
+        await queryRunner.manager.save(MonthlyExpense, monthlyExpense);
       } else {
         // MonthlyExpense가 없으면 새로 생성
-        await this.monthlyExpenseRepository.save({
+        await queryRunner.manager.save(MonthlyExpense, {
           user: { id: userId },
           month: spentMonth,
           totalExpense: createExpenseDto.amount,
         });
       }
+
+      await queryRunner.commitTransaction();
     } catch (error) {
+      await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException(FailType.EXPENSE_CREATE_FAIL);
+    } finally {
+      await queryRunner.release();
     }
   }
 
@@ -167,8 +179,16 @@ export class ExpenseService {
     expenseId: number,
     updateExpenseDto: UpdateExpenseDto,
   ): Promise<void> {
+    const queryRunner =
+      this.expenseRepository.manager.connection.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
     try {
-      const expense = await this.findIfExpenseExists(expenseId);
+      const expense = await queryRunner.manager.findOne(Expense, {
+        where: { id: expenseId },
+      });
 
       if (!expense) {
         throw new NotFoundException(FailType.EXPENSE_NOT_FOUND);
@@ -178,31 +198,45 @@ export class ExpenseService {
 
       Object.assign(expense, updateExpenseDto);
 
-      await this.expenseRepository.save(expense);
+      await queryRunner.manager.save(Expense, expense);
 
       // 해당 사용자 및 월에 해당하는 MonthlyExpense 조회
       const spentMonth = format(expense.spentDate, 'yyyy-MM');
 
-      const monthlyExpense = await this.monthlyExpenseRepository.findOne({
+      const monthlyExpense = await queryRunner.manager.findOne(MonthlyExpense, {
         where: { user: { id: expense.user.id }, month: spentMonth },
       });
 
       if (monthlyExpense) {
         monthlyExpense.totalExpense += expense.amount - originalAmount;
-        await this.monthlyExpenseRepository.save(monthlyExpense);
+        await queryRunner.manager.save(MonthlyExpense, monthlyExpense);
       }
+
+      await queryRunner.commitTransaction();
     } catch (error) {
+      await queryRunner.rollbackTransaction();
+
       if (error instanceof NotFoundException) {
         throw new NotFoundException(FailType.EXPENSE_NOT_FOUND);
       } else {
         throw new InternalServerErrorException(FailType.EXPENSE_UPDATE_FAIL);
       }
+    } finally {
+      await queryRunner.release();
     }
   }
 
   async deleteExpense(expenseId: number): Promise<void> {
+    const queryRunner =
+      this.expenseRepository.manager.connection.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
     try {
-      const expense = await this.findIfExpenseExists(expenseId);
+      const expense = await queryRunner.manager.findOne(Expense, {
+        where: { id: expenseId },
+      });
 
       if (!expense) {
         throw new NotFoundException(FailType.EXPENSE_NOT_FOUND);
@@ -210,22 +244,28 @@ export class ExpenseService {
 
       const spentMonth = format(expense.spentDate, 'yyyy-MM');
 
-      const monthlyExpense = await this.monthlyExpenseRepository.findOne({
+      const monthlyExpense = await queryRunner.manager.findOne(MonthlyExpense, {
         where: { user: { id: expense.user.id }, month: spentMonth },
       });
 
       if (monthlyExpense) {
         monthlyExpense.totalExpense -= expense.amount;
-        await this.monthlyExpenseRepository.save(monthlyExpense);
+        await queryRunner.manager.save(MonthlyExpense, monthlyExpense);
       }
 
-      await this.expenseRepository.delete(expenseId);
+      await queryRunner.manager.delete(Expense, expenseId);
+
+      await queryRunner.commitTransaction();
     } catch (error) {
+      await queryRunner.rollbackTransaction();
+
       if (error instanceof NotFoundException) {
         throw new NotFoundException(FailType.EXPENSE_NOT_FOUND);
       } else {
         throw new InternalServerErrorException(FailType.EXPENSE_DELETE_FAIL);
       }
+    } finally {
+      await queryRunner.release();
     }
   }
 
