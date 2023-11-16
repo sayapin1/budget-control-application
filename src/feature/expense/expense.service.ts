@@ -11,7 +11,7 @@ import { GetExpenseDto } from './dto/getExpense.dto';
 import { UpdateExpenseDto } from './dto/updateExpense.dto';
 import { Expense } from '../../entity/expense.entity';
 import { MonthlyExpense } from '../../entity/monthlyExpense.entity';
-import { parse, format } from 'date-fns';
+import { parse } from 'date-fns';
 
 @Injectable()
 export class ExpenseService {
@@ -169,6 +169,7 @@ export class ExpenseService {
       await queryRunner.commitTransaction();
     } catch (error) {
       await queryRunner.rollbackTransaction();
+      console.error(error);
       throw new InternalServerErrorException(FailType.EXPENSE_CREATE_FAIL);
     } finally {
       await queryRunner.release();
@@ -188,6 +189,8 @@ export class ExpenseService {
     try {
       const expense = await queryRunner.manager.findOne(Expense, {
         where: { id: expenseId },
+        select: { id: true, spentDate: true, amount: true, user: { id: true } },
+        relations: { user: true },
       });
 
       if (!expense) {
@@ -201,7 +204,10 @@ export class ExpenseService {
       await queryRunner.manager.save(Expense, expense);
 
       // 해당 사용자 및 월에 해당하는 MonthlyExpense 조회
-      const spentMonth = format(expense.spentDate, 'yyyy-MM');
+      const spentMonth = (expense.spentDate as unknown as string).substring(
+        0,
+        7,
+      );
 
       const monthlyExpense = await queryRunner.manager.findOne(MonthlyExpense, {
         where: { user: { id: expense.user.id }, month: spentMonth },
@@ -219,6 +225,7 @@ export class ExpenseService {
       if (error instanceof NotFoundException) {
         throw new NotFoundException(FailType.EXPENSE_NOT_FOUND);
       } else {
+        console.error(error);
         throw new InternalServerErrorException(FailType.EXPENSE_UPDATE_FAIL);
       }
     } finally {
@@ -236,13 +243,18 @@ export class ExpenseService {
     try {
       const expense = await queryRunner.manager.findOne(Expense, {
         where: { id: expenseId },
+        select: { id: true, spentDate: true, amount: true, user: { id: true } },
+        relations: { user: true },
       });
 
       if (!expense) {
         throw new NotFoundException(FailType.EXPENSE_NOT_FOUND);
       }
 
-      const spentMonth = format(expense.spentDate, 'yyyy-MM');
+      const spentMonth = (expense.spentDate as unknown as string).substring(
+        0,
+        7,
+      );
 
       const monthlyExpense = await queryRunner.manager.findOne(MonthlyExpense, {
         where: { user: { id: expense.user.id }, month: spentMonth },
@@ -262,17 +274,12 @@ export class ExpenseService {
       if (error instanceof NotFoundException) {
         throw new NotFoundException(FailType.EXPENSE_NOT_FOUND);
       } else {
+        console.error(error);
         throw new InternalServerErrorException(FailType.EXPENSE_DELETE_FAIL);
       }
     } finally {
       await queryRunner.release();
     }
-  }
-
-  async findIfExpenseExists(expenseId: number): Promise<Expense> {
-    return await this.expenseRepository.findOne({
-      where: { id: expenseId },
-    });
   }
 
   /* 달의 지정일 부터 지정일까지 총 지출 내역 가져오기 */
