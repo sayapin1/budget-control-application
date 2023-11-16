@@ -183,7 +183,11 @@ export class DailyService {
   async getAverageBudgetStatistics(): Promise<void> {
     const averageBudget = await this.statisticsLib.getAverageBudgetStatistics();
 
-    await this.cacheManager.set('averageBudget', JSON.stringify(averageBudget));
+    await this.cacheManager.set(
+      'averageBudget',
+      JSON.stringify(averageBudget),
+      { ttl: 0 },
+    );
   }
 
   /* 이번달에 남은 기간 계산 */
