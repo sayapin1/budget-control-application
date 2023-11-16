@@ -1,4 +1,4 @@
-import { Controller, Get, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { DailyService } from './daily.service';
 import { JwtAuthGuard } from '../auth/guard/jwtAuth.guard';
 import { SuccessType } from '../../enum/successType.enum';
@@ -34,5 +34,10 @@ export class DailyController {
       message: SuccessType.EXPENSE_GUIDE_GET,
       data: expenseGuide,
     };
+  }
+
+  @Post('/cacheSet')
+  async setCache() {
+    await this.dailyService.getAverageBudgetStatistics();
   }
 }
