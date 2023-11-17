@@ -327,4 +327,46 @@ export class ExpenseService {
       throw new InternalServerErrorException();
     }
   }
+
+  /* 사용자의 월의 총 지출 가져오기 */
+  async getMonthlyExpense(
+    userId: number,
+    spentMonth: string,
+  ): Promise<MonthlyExpense> {
+    try {
+      return await this.monthlyExpenseRepository.findOne({
+        where: {
+          user: { id: userId },
+          month: spentMonth,
+        },
+        select: {
+          id: true,
+          totalExpense: true,
+        },
+      });
+    } catch (error) {
+      console.error(error);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  /* 사용자를 제외한 다른 유저들의 월의 지출 평균 가져오기 */
+  async getOthersMonthlyExpenseAverage(
+    userId: number,
+    spentMonth: string,
+  ): Promise<number> {
+    try {
+      const result = await this.monthlyExpenseRepository
+        .createQueryBuilder('monthlyExpense')
+        .select('AVG(monthlyExpense.totalExpense)', 'average')
+        .where('monthlyExpense.user != :userId', { userId })
+        .andWhere('monthlyExpense.month = :spentMonth', { spentMonth })
+        .getRawOne();
+
+      return parseFloat(result.average) || 0;
+    } catch (error) {
+      console.error(error);
+      throw new InternalServerErrorException();
+    }
+  }
 }
