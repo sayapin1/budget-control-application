@@ -134,35 +134,45 @@ export class StatisticsService {
   async getExpenseStatisticsByUser(userId: number) {
     try {
       // 이번 달의 시작일부터 오늘까지의 지출 내역 가져오기
-      const startOfMonthDate = startOfMonth(new Date());
       const today = new Date();
       const thisYear = today.getFullYear();
       const thisMonth = today.getMonth() + 1;
       const formattedMonth = thisMonth < 10 ? `0${thisMonth}` : thisMonth;
       const thisYearMonth = `${thisYear}-${formattedMonth}`;
-      const thisMonthExpenses = await this.expenseLib.getExpensesInDateRange(
+      const thisMonthExpenses = await this.expenseLib.getMonthlyExpense(
         userId,
-        startOfMonthDate,
-        today,
+        thisYearMonth,
       );
 
       const thisMonthBudget = await this.budgetLib.getBudgetSettingsById(
         userId,
         thisYearMonth,
-      ); //설정한 이번달 카테고리 별 예산
+      ); //설정한 이번달 예산
 
       // 이번 달 사용자의 지출과 예산 대비 비율 계산
-      const thisMonthTotal =
-        this.utilService.calculateTotalAmount(thisMonthExpenses);
-      const userRatio = thisMonthTotal / thisMonthBudget;
+      const thisMonthTotal = thisMonthExpenses.totalExpense;
+      const userRatio = thisMonthTotal / thisMonthBudget.total;
 
       // 다른 사용자들의 이번 달의 평균 비율 계산
-      const otherUsersAverageRatio = 0.5;
+      const otherUsersMonthExpenses =
+        await this.expenseLib.getOthersMonthlyExpenseAverage(
+          userId,
+          thisYearMonth,
+        );
+      const otherUsersBudget = await this.budgetLib.getOtherUsersBudgetAverage(
+        userId,
+        thisYearMonth,
+      );
+
+      console.log('otherMonthExpense:', otherUsersMonthExpenses);
+      console.log('otherUsersBudget:', otherUsersBudget);
+
+      const otherUsersAverageRatio = otherUsersMonthExpenses / otherUsersBudget;
 
       // 나의 소비율 대비 다른 사용자 대비 소비율 계산
-      const comparedRatio = (userRatio / otherUsersAverageRatio) * 100;
-
-      return comparedRatio;
+      return (
+        Math.round((userRatio / otherUsersAverageRatio) * 100).toString() + '%'
+      );
     } catch (error) {
       console.error(error);
       throw new InternalServerErrorException();
