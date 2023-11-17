@@ -153,4 +153,24 @@ export class BudgetService {
 
     return recommendedBudget;
   }
+
+  /* 사용자를 제외한 다른 유저들의 예산 평균 가져오기 */
+  async getOtherUsersBudgetAverage(
+    userId: number,
+    month: string,
+  ): Promise<number> {
+    try {
+      const result = await this.budgetRepository
+        .createQueryBuilder('budget')
+        .select('AVG(budget.total)', 'average')
+        .where('budget.user != :userId', { userId })
+        .andWhere('budget.month = :month', { month })
+        .getRawOne();
+
+      return parseFloat(result.average) || 0;
+    } catch (error) {
+      console.error(error);
+      throw new InternalServerErrorException();
+    }
+  }
 }
