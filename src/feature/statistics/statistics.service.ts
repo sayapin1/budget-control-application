@@ -193,28 +193,35 @@ export class StatisticsService {
       .addSelect('AVG(education)', 'education')
       .addSelect('AVG(saving)', 'saving')
       .addSelect('AVG(etc)', 'etc')
-      .addSelect('AVG(total)', 'total')
       .getRawOne();
 
     const averageBudgetStatistics: { [key: string]: number } = {};
 
     let etcSum = 0;
+    let total = 0;
 
     for (const key in budgetStatistics) {
       if (budgetStatistics.hasOwnProperty(key)) {
-        let value = parseFloat(budgetStatistics[key]);
+        const categoryTotal = parseFloat(budgetStatistics[key]);
 
-        if (isNaN(value)) {
-          value = 0;
+        if (isNaN(categoryTotal)) {
+          continue;
         }
 
-        // 비율로 변환
-        if (key !== 'total') {
-          value = value / budgetStatistics['total'];
-          averageBudgetStatistics[key] = value;
+        if (key !== 'etc') {
+          total += categoryTotal;
         }
 
-        if (value <= 0.1 && key !== 'total') {
+        averageBudgetStatistics[key] = categoryTotal;
+      }
+    }
+
+    for (const key in averageBudgetStatistics) {
+      if (key !== 'etc') {
+        const value = averageBudgetStatistics[key] / total;
+        averageBudgetStatistics[key] = value;
+
+        if (value <= 0.1) {
           etcSum += value;
           delete averageBudgetStatistics[key];
         }
