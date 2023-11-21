@@ -57,7 +57,7 @@ export class DailyService {
     const minAmount = 1000; // 최소 금액 설정
 
     // 이후 일자 동안의 예산 계산
-    const remainingDays = this.getRemainingDaysInMonth();
+    const remainingDays = this.utilService.getRemainingDaysInMonth();
 
     const dailyBudget = Math.max(
       minAmount,
@@ -188,16 +188,5 @@ export class DailyService {
       JSON.stringify(averageBudget),
       { ttl: 0 },
     );
-  }
-
-  /* 이번달에 남은 기간 계산 */
-  getRemainingDaysInMonth(): number {
-    const today = new Date();
-    const lastDayOfMonth = new Date(
-      today.getFullYear(),
-      today.getMonth() + 1,
-      0,
-    );
-    return lastDayOfMonth.getDate() - today.getDate() + 1;
   }
 }
