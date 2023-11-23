@@ -1,4 +1,4 @@
-# 💰 예산 관리 어플리케이션
+# 💰 예산 관리 어플리케이션  
 
 ## #️⃣ 프로젝트 소개
 
@@ -33,7 +33,8 @@
     - 사용자는 매일 지출을 등록할 수 있습니다.
 - 유저 ↔️ 월별 지출 `1:N`
     - 사용자가 지출을 생성할 때마다 각 월에 해당하는 지출이 증가합니다.
-    <img src="https://hackmd.io/_uploads/SkA1MQ64p.png"> 
+    ![ERD](https://hackmd.io/_uploads/SylSHXaNT.png)
+
 
 
 
