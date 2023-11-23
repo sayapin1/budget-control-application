@@ -22,7 +22,7 @@ export class ExpenseService {
     private readonly monthlyExpenseRepository: Repository<MonthlyExpense>,
   ) {}
 
-  async getExpenseById(expenseId: number): Promise<Expense> {
+  async getExpenseById(expenseId: number): Promise<any> {
     try {
       const expenseDetail = await this.expenseRepository.findOne({
         where: {
@@ -57,7 +57,7 @@ export class ExpenseService {
   }
 
   async getExpenseListByQuery(getExpenseDto: GetExpenseDto): Promise<{
-    expenses: Expense[];
+    expenses: any;
     totalAmount: number;
     categoryTotalAmounts: Record<string, number>;
   }> {
