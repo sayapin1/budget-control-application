@@ -164,9 +164,6 @@ export class StatisticsService {
         thisYearMonth,
       );
 
-      console.log('otherMonthExpense:', otherUsersMonthExpenses);
-      console.log('otherUsersBudget:', otherUsersBudget);
-
       const otherUsersAverageRatio = otherUsersMonthExpenses / otherUsersBudget;
 
       // 나의 소비율 대비 다른 사용자 대비 소비율 계산
