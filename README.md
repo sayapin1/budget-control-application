@@ -33,7 +33,7 @@
     - 사용자는 매일 지출을 등록할 수 있습니다.
 - 유저 ↔️ 월별 지출 `1:N`
     - 사용자가 지출을 생성할 때마다 각 월에 해당하는 지출이 증가합니다.
-      ![ERD](https://hackmd.io/_uploads/SkA1MQ64p.png)
+    <img src="https://hackmd.io/_uploads/SkA1MQ64p.png"> 
 
 
 
